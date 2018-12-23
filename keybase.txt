@@ -1,0 +1,56 @@
+==================================================================
+https://keybase.io/keyzer
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://sayen.io
+  * I am keyzer (https://keybase.io/keyzer) on keybase.
+  * I have a public key ASCLLJ-CpD2I8Bvq65Rqudggsc8N0D057pL7GEhIpMWmHAo
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "01015ca78cd415aa840882b3fca6046f0bca1b4976308ee83b3b4de267cf228562220a",
+      "host": "keybase.io",
+      "kid": "01208b2c9f82a43d88f01beaeb946ab9d820b1cf0dd03d39ee92fb184848a4c5a61c0a",
+      "uid": "779564fca242037e4192ee40b1a07319",
+      "username": "keyzer"
+    },
+    "merkle_root": {
+      "ctime": 1545597148,
+      "hash": "86bdd36ead87941e7bedec5a781f32d265040473d15526251e36d49db914fc2aec85da29294df242f9afb07425dbe213d5830128e544d8b4f19e10f4809bc82c",
+      "hash_meta": "dbf4d627b22951be7a773945fb6a3d6be3ca3d659f6e47c930c50e4c90b0b92b",
+      "seqno": 4188649
+    },
+    "service": {
+      "entropy": "ENIx7MutWq5oEew5rbaZaM29",
+      "hostname": "sayen.io",
+      "protocol": "https:"
+    },
+    "type": "web_service_binding",
+    "version": 2
+  },
+  "client": {
+    "name": "keybase.io go client",
+    "version": "2.12.4"
+  },
+  "ctime": 1545597172,
+  "expire_in": 504576000,
+  "prev": "480abdb60cb942ddc1d32723daa3028a563af9373ebd582bf37cad9f47571da6",
+  "seqno": 92,
+  "tag": "signature"
+}
+
+which yields the signature:
+
+hKRib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEgiyyfgqQ9iPAb6uuUarnYILHPDdA9Oe6S+xhISKTFphwKp3BheWxvYWTESpcCXMQgSAq9tgy5Qt3B0ycj2qMCilY6+Tc+vVgr83ytn0dXHabEIC5xJqINW4cfxXMhxZ/yV87ol/iCZp2Vrovo7BlWGJ3IAgHCo3NpZ8RAvMTXiYbWa3XLa5cHRKJ1Q1SthtNFWTndtRn3RpkUq+39P5R3ZpYerC60POitw1KfQ6TffEKuFytFP9xbIAnqBahzaWdfdHlwZSCkaGFzaIKkdHlwZQildmFsdWXEIKvZ4AZsDZ7E1SpvHlLsknnX7o779bOzXCCArp067Wmso3RhZ80CAqd2ZXJzaW9uAQ==
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/keyzer
+
+==================================================================
