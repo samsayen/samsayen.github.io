@@ -12,4 +12,4 @@ CVE-2018-20146 - Profile Unity FlexApp - Priv Esc - I found it by accident, @r3d
 
 # Contact Details   
 sam at sayen.io   
-[keybase.io/keyzer]   
+[https://keybase.io/keyzer]   
