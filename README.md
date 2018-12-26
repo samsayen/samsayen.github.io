@@ -1,7 +1,7 @@
 # Projects   
 ### Under development   
-Payload Delivery Shelter (PDS) - [https://github.com/samsayen/PDS]   
-JQueryingU - [https://github.com/samsayen/JQueryingU]
+Payload Delivery Shelter (PDS) - [https://github.com/samsayen/PDS] (PDS Github)  
+JQueryingU - [https://github.com/samsayen/JQueryingU] (JQueryingU Github)
 
 # Work   
 I am a senior consultant for Mandiant working in proactive services.   
