@@ -1,8 +1,5 @@
-# Work  
-I am a senior consultant for Mandiant working in proactive services.   
-
 ## Code Stuff
-Payload Delivery Shelter (PDS) - https://github.com/samsayen/PDS
+Payload Delivery Shelter (PDS) - [https://github.com/samsayen/PDS] (wtf markdown)
 
 ## Vuln Stuff   
 CVE-2018-15780 - RSA Archer - Authorization Bypass   
