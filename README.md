@@ -1,5 +1,5 @@
 ## Code Stuff
-Payload Delivery Shelter (PDS) - [https://github.com/samsayen/PDS] (wtf markdown)
+Payload Delivery Shelter (PDS) - https://github.com/samsayen/PDS
 
 ## Vuln Stuff   
 CVE-2018-15780 - RSA Archer - Authorization Bypass   
