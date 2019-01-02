@@ -12,5 +12,4 @@ CVE-2018-20146 - Profile Unity FlexApp - Priv Esc - I found it by accident, @r3d
 Derby Con 2018 - Red Teaming Gaps and Musings - https://www.youtube.com/watch?v=Cic1ftJfFBk   
 
 ### Contact Details   
-sam at sayen.io   
-[https://keybase.io/keyzer]   
+sam at sayen.io or https://keybase.io/keyzer   
