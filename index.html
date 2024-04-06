@@ -2,24 +2,22 @@
 <html>
 <head>
     <style>
-        body, html {
-            height: 100%;
-            margin: 100;
-            padding: 100;
+        .image-container {
+            width: 75%; /* Set the width to 75% of the screen width */
+            margin: 0 auto; /* Center the image horizontally */
         }
-
-        .bg {
-            background-image: url('tremont.jpeg');
-            height: 75%;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
+        .image-container img {
+            width: 100%;
+            height: auto;
+            padding: 30px;
         }
     </style>
 </head>
 <body>
 
-<div class="bg"></div>
+<div class="image-container">
+    <img src="tremont.jpeg" alt="Tremont">
+</div>
 
 </body>
 </html>
