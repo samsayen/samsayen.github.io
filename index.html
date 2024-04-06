@@ -4,12 +4,13 @@
     <style>
         .image-container {
             width: 75%; /* Set the width to 75% of the screen width */
-            margin: 0 auto; /* Center the image horizontally */
+            margin: 30px auto; /* Add 30 pixel spacing around the image and center it horizontally */
+            box-sizing: border-box;
         }
         .image-container img {
             width: 100%;
             height: auto;
-            padding: 30px;
+            object-fit: contain; /* Ensure the image is not clipped */
         }
     </style>
 </head>
