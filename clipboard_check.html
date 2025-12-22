@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clipboard Writer</title>
+</head>
+<body>
+    <label>
+        <input type="checkbox" id="clipboardCheckbox">
+        Write to clipboard
+    </label>
+
+    <script>
+        document.getElementById('clipboardCheckbox').addEventListener('change', function(e) {
+            if (e.target.checked) {
+                const text = 'hello, this is clipboard';
+                
+                // Try modern API first
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text)
+                        .then(() => {
+                            console.log('Text copied to clipboard');
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy text: ', err);
+                            fallbackCopy(text);
+                        });
+                } else {
+                    // Fallback for older browsers
+                    fallbackCopy(text);
+                }
+            }
+        });
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                console.log('Text copied to clipboard (fallback)');
+            } catch (err) {
+                console.error('Fallback copy failed: ', err);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+    </script>
+</body>
+</html>
