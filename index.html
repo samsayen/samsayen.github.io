@@ -1,24 +1,176 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-    <style>
-        .image-container {
-            width: 50%; /* Set the width to 75% of the screen width */
-            margin: 100px auto; /* Add 30 pixel spacing around the image and center it horizontally */
-            box-sizing: border-box;
-        }
-        .image-container img {
-            width: 80%;
-            height: auto;
-            object-fit: contain; /* Ensure the image is not clipped */
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Tesla Orb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root { --paper: #ecebe8; --label: #555555; color-scheme: light; }
+  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; }
+  #stage {
+    position: fixed; inset: 0;
+    width: 100vw; height: 100vh; height: 100dvh;
+    overflow: hidden; background: var(--paper);
+  }
+  #stage pre {
+    position: absolute; left: 0; top: 0; margin: 0;
+    font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    white-space: pre; pointer-events: none;
+    font-kerning: none; font-variant-ligatures: none; letter-spacing: 0;
+  }
+  #probe { position: absolute; visibility: hidden; white-space: pre; font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace; }
+</style>
 </head>
 <body>
+<div id="stage" role="img" aria-label="An orb with a cube inside it, drawn from fourteen overlaid layers of Nikola Tesla quotations in fourteen languages; darker areas are where more layers stack"></div>
+<span id="probe" aria-hidden="true"></span>
+<script>
+(function () {
+  const INK = 0.13;        // opacity of one layer; darkness = layers stacked
+  const CUBE = 0.52;       // cube size relative to the orb
 
-<div class="image-container">
-    <img src="tremont.jpeg" alt="Tremont">
-</div>
+  const LANGS = [
+    ['en', "Throughout space there is energy. Is this energy static or kinetic? If static our hopes are in vain; if kinetic — and this we know it is, for certain — then it is a mere question of time when men will succeed in attaching their machinery to the very wheelwork of nature. · The progressive development of man is vitally dependent on invention. · "],
+    ['sr', "Садашњост је њихова; будућност, за коју сам заиста радио, моја је. · Нека будућност каже истину и оцени свакога према његовом раду и достигнућима. · "],
+    ['de', "Im ganzen Weltraum gibt es Energie. Es ist nur eine Frage der Zeit, bis es den Menschen gelingt, ihre Maschinen an das Räderwerk der Natur selbst anzuschließen. · "],
+    ['fr', "Nos vertus et nos défauts sont inséparables, comme la force et la matière. Quand ils se séparent, l'homme n'est plus. · "],
+    ['ru', "Прогрессивное развитие человека жизненно зависит от изобретений. Это самый важный продукт его творческого разума. · "],
+    ['it', "Il presente è loro; il futuro, per il quale ho davvero lavorato, è mio. · "],
+    ['el', "Σε όλο το διάστημα υπάρχει ενέργεια. Είναι αυτή η ενέργεια στατική ή κινητική; · "],
+    ['hr', "Kroz cijeli svemir postoji energija. · Napredni razvoj čovjeka životno ovisi o izumima. To je najvažniji proizvod njegova stvaralačkog uma. · "],
+    ['es', "Nuestras virtudes y nuestros defectos son inseparables, como la fuerza y la materia. Cuando se separan, el hombre deja de existir. · "],
+    ['uk', "У всьому просторі є енергія. Це лише питання часу, коли люди зможуть приєднати свої машини до самого механізму природи. · "],
+    ['pt', "Por todo o espaço há energia. É apenas uma questão de tempo até que os homens consigam ligar as suas máquinas à própria engrenagem da natureza. · "],
+    ['pl', "W całej przestrzeni jest energia. To tylko kwestia czasu, kiedy ludzie zdołają przyłączyć swoje maszyny do samej przekładni natury. · "],
+    ['cs', "V celém prostoru je energie. Je jen otázkou času, kdy se lidem podaří připojit své stroje k samotnému soukolí přírody. · "],
+    ['nl', "Door de hele ruimte heen is er energie. Het is slechts een kwestie van tijd voordat de mens zijn machines aan het raderwerk van de natuur zelf weet te koppelen. · "]
+  ];
+  const N = LANGS.length;
 
+  const hash = (a, b, c) => {
+    let h = (a * 73856093) ^ (b * 19349663) ^ (c * 83492791);
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+  };
+
+  // Isometric cube in orb-normalised coords: edges = all layers, faces = a few, hidden edges faint.
+  const A = CUBE * 1.15, HX = A * 0.8660254;
+  const T = [0, -A], UR = [HX, -A / 2], LR = [HX, A / 2], B = [0, A], LL = [-HX, A / 2], UL = [-HX, -A / 2], C = [0, 0];
+  const VISIBLE = [[T, UR], [UR, LR], [LR, B], [B, LL], [LL, UL], [UL, T], [C, UL], [C, UR], [C, B]];
+  const HIDDEN = [[C, T], [C, LL], [C, LR]];
+  const FACES = [[[T, UR, C, UL], 2.5], [[UL, C, B, LL], 5], [[C, UR, LR, B], 8]];
+
+  function segDist(x, y, p, q) {
+    const vx = q[0] - p[0], vy = q[1] - p[1];
+    let u = ((x - p[0]) * vx + (y - p[1]) * vy) / (vx * vx + vy * vy);
+    u = Math.max(0, Math.min(1, u));
+    const ex = p[0] + u * vx - x, ey = p[1] + u * vy - y;
+    return Math.sqrt(ex * ex + ey * ey);
+  }
+  function inside(x, y, poly) {
+    let sign = 0;
+    for (let i = 0; i < poly.length; i++) {
+      const p = poly[i], q = poly[(i + 1) % poly.length];
+      const c = (q[0] - p[0]) * (y - p[1]) - (q[1] - p[1]) * (x - p[0]);
+      if (c !== 0) {
+        if (sign === 0) sign = Math.sign(c);
+        else if (Math.sign(c) !== sign) return false;
+      }
+    }
+    return true;
+  }
+  function cubeDepth(x, y, t) {
+    for (const e of VISIBLE) if (segDist(x, y, e[0], e[1]) < t / 2) return N;
+    let face = null;
+    for (const f of FACES) if (inside(x, y, f[0])) { face = f[1]; break; }
+    if (face === null) return null;
+    for (const e of HIDDEN) if (segDist(x, y, e[0], e[1]) < t / 4) return face + 3;
+    return face;
+  }
+
+  // How many layers stack at a pixel — the whole image lives in this one field.
+  function depth(px, py, g) {
+    const nx = (px - g.cx) / g.R, ny = (py - g.cy) / g.R;
+    const r = Math.sqrt(nx * nx + ny * ny);
+    if (r > 1) {
+      if (r < 1.035) return 0;
+      return 1.5 * Math.min(1, (r - 1.035) / 0.12);
+    }
+    const cube = cubeDepth(nx, ny, g.edge / g.R);
+    if (cube !== null) return cube;
+    const z = Math.sqrt(Math.max(0, 1 - r * r));
+    let I = nx * -0.5 + ny * -0.6 + z * 0.62;
+    I = Math.min(1, Math.max(0, I));
+    let d = 2 + 9.5 * (1 - I);
+    d -= 3 * Math.pow(1 - z, 3) * (1 - I);
+    return Math.max(1.5, d);
+  }
+
+  const stage = document.getElementById('stage');
+  const probe = document.getElementById('probe');
+
+  function render() {
+    const vw = stage.clientWidth, vh = stage.clientHeight;
+    const minSide = Math.min(vw, vh);
+    // Type scales with the screen: ~8px on phones, up to 13px on large displays.
+    const fs = Math.max(8, Math.min(13, minSide / 90));
+    probe.style.fontSize = fs + 'px';
+    probe.textContent = 'M'.repeat(200);
+    const cw = probe.getBoundingClientRect().width / 200 || fs * 0.6;
+    const ch = fs;
+
+    const g = { cx: vw / 2, cy: vh / 2, R: Math.min(vw * 0.47, vh * 0.43), edge: Math.max(10, minSide * 0.022) };
+    const cols = Math.ceil(vw / cw) + 2, rows = Math.ceil(vh / ch) + 2;
+
+    const frag = document.createDocumentFragment();
+    for (let k = 0; k < N; k++) {
+      const dx = ((k * 0.375) % 1) * cw;
+      const dy = (((k * 5) % 12) / 12) * ch;
+      const src = LANGS[k][1];
+      let i = 0;
+      const lines = new Array(rows);
+      for (let row = 0; row < rows; row++) {
+        let line = '';
+        for (let col = 0; col < cols; col++) {
+          const px = (col + 0.5) * cw + dx - cw, py = (row + 0.5) * ch + dy - ch;
+          if (depth(px, py, g) - k > hash(col, row, k + 1)) { line += src[i % src.length]; i++; }
+          else line += ' ';
+        }
+        lines[row] = line.replace(/\s+$/, '');
+      }
+      const pre = document.createElement('pre');
+      pre.lang = LANGS[k][0];
+      pre.setAttribute('aria-hidden', 'true');
+      pre.style.cssText = 'left:' + (dx - cw) + 'px;top:' + (dy - ch) + 'px;font-size:' + fs + 'px;line-height:' + ch + 'px;color:rgba(24,24,24,' + INK + ')';
+      pre.textContent = lines.join('\n');
+      frag.appendChild(pre);
+    }
+    stage.replaceChildren(frag);
+  }
+
+  let timer = null, lastW = 0, lastH = 0;
+  function schedule() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    // Ignore tiny height jitter from mobile address bars.
+    if (Math.abs(w - lastW) < 2 && Math.abs(h - lastH) < 60) return;
+    lastW = w; lastH = h;
+    clearTimeout(timer);
+    timer = setTimeout(render, 120);
+  }
+
+  const start = () => { lastW = stage.clientWidth; lastH = stage.clientHeight; render(); };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.load('12px "JetBrains Mono"').catch(() => {}).finally(() => document.fonts.ready.then(start));
+  } else {
+    start();
+  }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('orientationchange', () => setTimeout(() => { lastW = 0; schedule(); }, 200));
+})();
+</script>
 </body>
 </html>
