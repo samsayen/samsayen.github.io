@@ -16,6 +16,7 @@
     width: 100vw; height: 100vh; height: 100dvh;
     overflow: hidden; background: var(--paper);
   }
+  #field { position: absolute; left: 0; top: 0; width: 100%; will-change: transform; }
   #stage pre {
     position: absolute; left: 0; top: 0; margin: 0;
     font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
@@ -112,6 +113,18 @@
 
   const stage = document.getElementById('stage');
   const probe = document.getElementById('probe');
+  // Text is drawn taller than the screen (PAD above and below) so it always fills
+  // vertically, even when mobile browser bars grow or shrink the viewport.
+  const PAD = 120;
+  const field = document.createElement('div');
+  field.id = 'field';
+  stage.appendChild(field);
+  let fieldH = 0;
+
+  // Keep the orb centred on the visible screen without a full redraw.
+  function place() {
+    field.style.transform = 'translateY(' + ((stage.clientHeight - fieldH) / 2) + 'px)';
+  }
 
   function render() {
     const vw = stage.clientWidth, vh = stage.clientHeight;
@@ -123,8 +136,9 @@
     const cw = probe.getBoundingClientRect().width / 200 || fs * 0.6;
     const ch = fs;
 
-    const g = { cx: vw / 2, cy: vh / 2, R: Math.min(vw * 0.47, vh * 0.43), edge: Math.max(10, minSide * 0.022) };
-    const cols = Math.ceil(vw / cw) + 2, rows = Math.ceil(vh / ch) + 2;
+    fieldH = vh + PAD * 2;
+    const g = { cx: vw / 2, cy: fieldH / 2, R: Math.min(vw * 0.47, vh * 0.43), edge: Math.max(10, minSide * 0.022) };
+    const cols = Math.ceil(vw / cw) + 2, rows = Math.ceil(fieldH / ch) + 2;
 
     const frag = document.createDocumentFragment();
     for (let k = 0; k < N; k++) {
@@ -149,13 +163,16 @@
       pre.textContent = lines.join('\n');
       frag.appendChild(pre);
     }
-    stage.replaceChildren(frag);
+    field.style.height = fieldH + 'px';
+    field.replaceChildren(frag);
+    place();
   }
 
   let timer = null, lastW = 0, lastH = 0;
   function schedule() {
     const w = stage.clientWidth, h = stage.clientHeight;
-    // Ignore tiny height jitter from mobile address bars.
+    place();
+    // Small height changes (mobile address bars) are covered by PAD; only redraw on big ones.
     if (Math.abs(w - lastW) < 2 && Math.abs(h - lastH) < 60) return;
     lastW = w; lastH = h;
     clearTimeout(timer);
